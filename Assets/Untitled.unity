@@ -519,6 +519,12 @@ MonoBehaviour:
   ShowLiveFeed: 0
   DelaySeconds: 0.1
   MaxBufferSize: 25
+  StrobeDelay: 1
+  StrobeDuration: 0.1
+  StrobeTexture: {fileID: 0}
+  StrobeColour: {r: 0, g: 0, b: 0, a: 1}
+  InitialClear: 1
+  InitialClearColour: {r: 0.65517235, g: 0, b: 1, a: 1}
 --- !u!1 &1444846226
 GameObject:
   m_ObjectHideFlags: 0

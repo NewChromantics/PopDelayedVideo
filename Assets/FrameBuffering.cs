@@ -18,6 +18,7 @@ public class FrameBuffering : MonoBehaviour {
 	[Range(1,10)]
 	public float			DelayBeforeShowLiveFeed = 4;
 
+	[Header("Left eye contains live feed when this is checked")]
 	public bool				ShowLiveFeed = false;
 
 	[Header("Delay from live feed in seconds")]
@@ -32,7 +33,44 @@ public class FrameBuffering : MonoBehaviour {
 
 	private uint			LastFrameTime = 0;
 
+	[Header("How often do we strobe")]
+	[Range(0.1f,10)]
+	public float			StrobeDelay = 2;
+	private float			StrobeTimeout = 0;
 
+	[Header("How long does the strobe last")]
+	[Range(0.01f,1.0f)]
+	public float			StrobeDuration = 0.1f;
+
+	[Header("Optionally set a texture to show when strobing (Colour used if no texture)")]
+	public Texture 			StrobeTexture = null;
+	public Color			StrobeColour = new Color (0, 0, 0, 1);
+
+	[Header("Clear targets at start to this colour")]
+	public bool				InitialClear = true;
+	public Color			InitialClearColour = new Color (0, 0, 0, 1);
+
+	void Start()
+	{
+		//	make a plain black texture. We would use Texture2D.blacktexture, but it has a 0 alpha
+		if ( StrobeTexture == null )
+		{
+			var StrobeTexture2D = new Texture2D(1,1,TextureFormat.RGB24,true);
+			StrobeTexture = StrobeTexture2D;
+			StrobeTexture2D.SetPixel (0, 0, StrobeColour);
+			StrobeTexture2D.Apply ();
+		}
+
+		//	clear targets at startup
+		if (InitialClear) 
+		{
+			var ClearTexture = new Texture2D (1, 1, TextureFormat.RGB24, true);
+			ClearTexture.SetPixel (0, 0, InitialClearColour);
+			ClearTexture.Apply ();
+			Graphics.Blit (ClearTexture, LeftEye);
+			Graphics.Blit (ClearTexture, RightEye);
+		}
+	}
 
 	void OnNewFrame(Texture Frame,uint FrameTime)
 	{
@@ -85,6 +123,7 @@ public class FrameBuffering : MonoBehaviour {
 		if (PopMovie == null)
 			return;
 
+
 		uint LastCopyTime = PopMovie.GetLastFrameCopiedMs ();
 		uint DelayMs = (uint)(DelaySeconds * 1000);
 
@@ -97,6 +136,29 @@ public class FrameBuffering : MonoBehaviour {
 		//	not done an initial delay yet
 		if (DelayMs > LastCopyTime)
 			return;
+
+		//	gr: don't strobe until we've buffered, otherwise the strobe can sit on screen too long.
+		//	check in case we need to strobe
+		StrobeTimeout -= Time.unscaledDeltaTime;
+		//	when counter is negative, we use it as the "how long we're strobing for" counter
+		if (StrobeTimeout < -StrobeDuration) {
+			//	reset 
+			//	gr: +Timeout so StrobeDelay is the time until next starts, not the GAP between strobes
+			StrobeTimeout = StrobeDelay + StrobeTimeout;
+		} else if (StrobeTimeout <= 0) {
+			//	strobe
+			//	gr: could save GPU time here and skip blit if we know the texture is black from before
+			Graphics.Blit (StrobeTexture, LeftEye);
+			Graphics.Blit (StrobeTexture, RightEye);
+			return;
+		}
+		else
+		{
+			//	counting down to strobe
+		}
+
+
+
 		var DelayedTime = LastCopyTime - DelayMs;
 
 		//	find last frame before delayed time
