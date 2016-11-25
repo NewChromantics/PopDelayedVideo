@@ -11,10 +11,18 @@ public class FrameBuffering : MonoBehaviour {
 		public uint				Time;
 	};
 
-	public RenderTexture	DelayedTarget;
+	public RenderTexture	LeftEye;
+	public RenderTexture	RightEye;
 
-	[Range(1,1000)]
-	public int				DelayMs = 100;
+	[Header("Delay before enabling live feed")]
+	[Range(1,10)]
+	public float			DelayBeforeShowLiveFeed = 4;
+
+	public bool				ShowLiveFeed = false;
+
+	[Header("Delay from live feed in seconds")]
+	[Range(1,5)]
+	public float			DelaySeconds = 0.1f;
 
 	[Range(1,50)]
 	public int				MaxBufferSize;
@@ -38,7 +46,7 @@ public class FrameBuffering : MonoBehaviour {
 		}
 
 		var Cache = new FrameCache ();
-		var NewFrame = new RenderTexture (Frame.width, Frame.height, 0, DelayedTarget.format );
+		var NewFrame = new RenderTexture (Frame.width, Frame.height, 0, RightEye.format );
 		NewFrame.name = "" + FrameTime;
 		Graphics.Blit (Frame, NewFrame);
 		Cache.Frame = NewFrame;
@@ -48,24 +56,43 @@ public class FrameBuffering : MonoBehaviour {
 
 	void PushBuffer()
 	{
-		var PopMovieSimple = GetComponent<PopMovieSimple> ();
-		var PopMovie = PopMovieSimple.Movie;
+		var PopMovie = GetMovie();
+		if (PopMovie == null) {
+			Debug.Log ("Waiting for movie");
+			return;
+		}
 
 		uint LastCopyTime = PopMovie.GetLastFrameCopiedMs ();
 		if ( LastCopyTime > LastFrameTime )
 		{
+			var PopMovieSimple = GetComponent<PopMovieSimple> ();
 			OnNewFrame (PopMovieSimple.TargetTexture,LastCopyTime);
 			LastFrameTime = LastCopyTime;
 		}
 	}
 
+	PopMovie GetMovie()
+	{
+		var PopMovieSimple = GetComponent<PopMovieSimple> ();
+		var Movie = PopMovieSimple.Movie;
+		return Movie;
+	}
+
 	void PopBuffer()
 	{
 		//	get frame closest to the delayed time... also a complicated thing.
-		var PopMovieSimple = GetComponent<PopMovieSimple> ();
-		var PopMovie = PopMovieSimple.Movie;
+		var PopMovie = GetMovie();
+		if (PopMovie == null)
+			return;
 
 		uint LastCopyTime = PopMovie.GetLastFrameCopiedMs ();
+		uint DelayMs = (uint)(DelaySeconds * 1000);
+
+		//	copy live frame
+		if (ShowLiveFeed) {
+			var PopMovieSimple = GetComponent<PopMovieSimple> ();
+			Graphics.Blit (PopMovieSimple.TargetTexture, LeftEye);
+		}
 
 		//	not done an initial delay yet
 		if (DelayMs > LastCopyTime)
@@ -83,14 +110,34 @@ public class FrameBuffering : MonoBehaviour {
 		if (PopIndex == -1)
 			return;
 
-		Graphics.Blit (FrameBuffer [PopIndex].Frame, DelayedTarget);
+		Graphics.Blit (FrameBuffer [PopIndex].Frame, RightEye);
+		if( !ShowLiveFeed )
+			Graphics.Blit (FrameBuffer [PopIndex].Frame, LeftEye);
+		
 		FrameBuffer.RemoveRange (0, PopIndex + 1);
+	}
+
+	void DoLiveSwitch()
+	{
+		if (ShowLiveFeed)
+			return;
+		
+		var PopMovie = GetMovie();
+		if (PopMovie == null)
+			return;
+
+		float LastCopyTime = PopMovie.GetLastFrameCopied ();
+		if (LastCopyTime > DelayBeforeShowLiveFeed)
+			ShowLiveFeed = true;
 	}
 
 	void Update () 
 	{
 		//	get new frames
 		PushBuffer();
+
+		DoLiveSwitch ();
+
 		//	push out old frames
 		PopBuffer();
 	}

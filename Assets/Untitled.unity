@@ -446,7 +446,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TargetTexture: {fileID: 8400000, guid: 546de8f0ee0b94ec98b6ffa82d4ece96, type: 2}
-  Filename: device:isight
+  Filename: device:*
   MovieTime: 0
   MovieTimeScalar: 1
   Parameters:
@@ -513,8 +513,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ea771db4d6124698b5fc3e7cedd90c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DelayedTarget: {fileID: 8400000, guid: 9599b84680a214fd69edd93af32302b7, type: 2}
-  DelayMs: 1000
+  LeftEye: {fileID: 8400000, guid: e7e3810e7c87b4d49b1503cc9881bac8, type: 2}
+  RightEye: {fileID: 8400000, guid: 9599b84680a214fd69edd93af32302b7, type: 2}
+  DelayBeforeShowLiveFeed: 4
+  ShowLiveFeed: 0
+  DelaySeconds: 0.1
   MaxBufferSize: 25
 --- !u!1 &1444846226
 GameObject:
@@ -570,7 +573,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Texture: {fileID: 8400000, guid: 546de8f0ee0b94ec98b6ffa82d4ece96, type: 2}
+  m_Texture: {fileID: 8400000, guid: e7e3810e7c87b4d49b1503cc9881bac8, type: 2}
   m_UVRect:
     serializedVersion: 2
     x: 0
