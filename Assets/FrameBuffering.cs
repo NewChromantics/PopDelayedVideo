@@ -14,6 +14,11 @@ public class FrameBuffering : MonoBehaviour {
 	public RenderTexture	LeftEye;
 	public RenderTexture	RightEye;
 
+	[Header("video input. If PopMovieObject is null, a webcam texture is created with the name below")]
+	public PopMovieSimple	PopMovieObject;
+	public string			WebcamName;
+	public WebCamTexture	Webcam;
+
 	[Header("Delay before enabling live feed")]
 	[Range(1,10)]
 	public float			DelayBeforeShowLiveFeed = 4;
@@ -32,6 +37,7 @@ public class FrameBuffering : MonoBehaviour {
 	public List<FrameCache>	FrameBuffer;
 
 	private uint			LastFrameTime = 0;
+	private float			WebcamFirstFrameTime = 0;
 
 	[Header("How often do we strobe")]
 	[Range(0.1f,10)]
@@ -70,10 +76,17 @@ public class FrameBuffering : MonoBehaviour {
 			Graphics.Blit (ClearTexture, LeftEye);
 			Graphics.Blit (ClearTexture, RightEye);
 		}
+
+		if (PopMovieObject == null)
+		{
+			PopMovieObject = GetComponent<PopMovieSimple> ();
+		}
 	}
 
 	void OnNewFrame(Texture Frame,uint FrameTime)
 	{
+		//Debug.Log("New frame: " + FrameTime);
+
 		if (FrameBuffer == null)
 			FrameBuffer = new List<FrameCache> ();
 
@@ -92,7 +105,7 @@ public class FrameBuffering : MonoBehaviour {
 		FrameBuffer.Add (Cache);
 	}
 
-	void PushBuffer()
+	void PushBuffer_PopMovie()
 	{
 		var PopMovie = GetMovie();
 		if (PopMovie == null) {
@@ -103,35 +116,68 @@ public class FrameBuffering : MonoBehaviour {
 		uint LastCopyTime = PopMovie.GetLastFrameCopiedMs ();
 		if ( LastCopyTime > LastFrameTime )
 		{
-			var PopMovieSimple = GetComponent<PopMovieSimple> ();
-			OnNewFrame (PopMovieSimple.TargetTexture,LastCopyTime);
+			OnNewFrame (PopMovieObject.TargetTexture,LastCopyTime);
 			LastFrameTime = LastCopyTime;
 		}
 	}
 
+	uint GetWebcamTime()
+	{
+		if ( WebcamFirstFrameTime == 0 )
+			WebcamFirstFrameTime = Time.time;
+
+		var TimeMs = (uint)((Time.time - WebcamFirstFrameTime) * 1000.0f);
+		return TimeMs;
+	}
+
+
+	void PushBuffer_Webcam()
+	{
+		if (Webcam == null)
+		{
+			Webcam = new WebCamTexture( WebcamName );
+			Webcam.Play();
+		}
+
+		if (Webcam.didUpdateThisFrame)
+		{
+			uint LastCopyTime = GetWebcamTime();
+			if ( LastCopyTime > LastFrameTime )
+			{
+				OnNewFrame (Webcam,LastCopyTime);
+				LastFrameTime = LastCopyTime;
+			}
+		}
+
+	}
+
+	
 	PopMovie GetMovie()
 	{
-		var PopMovieSimple = GetComponent<PopMovieSimple> ();
-		var Movie = PopMovieSimple.Movie;
+		if (!PopMovieObject)
+			return null;
+		var Movie = PopMovieObject.Movie;
 		return Movie;
 	}
 
 	void PopBuffer()
 	{
-		//	get frame closest to the delayed time... also a complicated thing.
-		var PopMovie = GetMovie();
-		if (PopMovie == null)
-			return;
-
-
-		uint LastCopyTime = PopMovie.GetLastFrameCopiedMs ();
-		uint DelayMs = (uint)(DelaySeconds * 1000);
-
 		//	copy live frame
 		if (ShowLiveFeed) {
-			var PopMovieSimple = GetComponent<PopMovieSimple> ();
-			Graphics.Blit (PopMovieSimple.TargetTexture, LeftEye);
+			if (PopMovieObject)
+			{
+				Graphics.Blit(PopMovieObject.TargetTexture, LeftEye);
+			}
+			else if (Webcam)
+			{
+				Graphics.Blit(Webcam, LeftEye);
+			}
+
 		}
+
+		//uint LastCopyTime = PopMovie.GetLastFrameCopiedMs ();
+		uint LastCopyTime = LastFrameTime;
+		uint DelayMs = (uint)(DelaySeconds * 1000);
 
 		//	not done an initial delay yet
 		if (DelayMs > LastCopyTime)
@@ -196,7 +242,15 @@ public class FrameBuffering : MonoBehaviour {
 	void Update () 
 	{
 		//	get new frames
-		PushBuffer();
+		if ( PopMovieObject != null )
+		{
+			PushBuffer_PopMovie();
+		}
+		else
+		{
+			PushBuffer_Webcam();
+		}
+		
 
 		DoLiveSwitch ();
 
