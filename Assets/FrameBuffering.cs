@@ -39,6 +39,8 @@ public class FrameBuffering : MonoBehaviour {
 	private uint			LastFrameTime = 0;
 	private float			WebcamFirstFrameTime = 0;
 
+	public bool				StrobeEnabled = true;
+
 	[Header("How often do we strobe")]
 	[Range(0.1f,10)]
 	public float			StrobeDelay = 2;
@@ -183,26 +185,28 @@ public class FrameBuffering : MonoBehaviour {
 		if (DelayMs > LastCopyTime)
 			return;
 
-		//	gr: don't strobe until we've buffered, otherwise the strobe can sit on screen too long.
-		//	check in case we need to strobe
-		StrobeTimeout -= Time.unscaledDeltaTime;
-		//	when counter is negative, we use it as the "how long we're strobing for" counter
-		if (StrobeTimeout < -StrobeDuration) {
-			//	reset 
-			//	gr: +Timeout so StrobeDelay is the time until next starts, not the GAP between strobes
-			StrobeTimeout = StrobeDelay + StrobeTimeout;
-		} else if (StrobeTimeout <= 0) {
-			//	strobe
-			//	gr: could save GPU time here and skip blit if we know the texture is black from before
-			Graphics.Blit (StrobeTexture, LeftEye);
-			Graphics.Blit (StrobeTexture, RightEye);
-			return;
-		}
-		else
+		if ( StrobeEnabled )
 		{
-			//	counting down to strobe
+			//	gr: don't strobe until we've buffered, otherwise the strobe can sit on screen too long.
+			//	check in case we need to strobe
+			StrobeTimeout -= Time.unscaledDeltaTime;
+			//	when counter is negative, we use it as the "how long we're strobing for" counter
+			if (StrobeTimeout < -StrobeDuration) {
+				//	reset 
+				//	gr: +Timeout so StrobeDelay is the time until next starts, not the GAP between strobes
+				StrobeTimeout = StrobeDelay + StrobeTimeout;
+			} else if (StrobeTimeout <= 0) {
+				//	strobe
+				//	gr: could save GPU time here and skip blit if we know the texture is black from before
+				Graphics.Blit (StrobeTexture, LeftEye);
+				Graphics.Blit (StrobeTexture, RightEye);
+				return;
+			}
+			else
+			{
+				//	counting down to strobe
+			}
 		}
-
 
 
 		var DelayedTime = LastCopyTime - DelayMs;
