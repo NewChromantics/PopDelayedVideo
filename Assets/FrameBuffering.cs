@@ -19,6 +19,9 @@ public class FrameBuffering : MonoBehaviour {
 	public string			WebcamName;
 	public WebCamTexture	Webcam;
 
+	[Header("Set this texture and we'll use it instead of a webcam (for when you have no webcam)")]
+	public Texture			DummyWebcam;
+
 	[Header("Delay before enabling live feed")]
 	[Range(1,10)]
 	public float			DelayBeforeShowLiveFeed = 4;
@@ -27,7 +30,7 @@ public class FrameBuffering : MonoBehaviour {
 	public bool				ShowLiveFeed = false;
 
 	[Header("Delay from live feed in seconds")]
-	[Range(1,5)]
+	[Range(1,10)]
 	public float			DelaySeconds = 0.1f;
 
 	[Range(1,50)]
@@ -41,14 +44,15 @@ public class FrameBuffering : MonoBehaviour {
 
 	public bool				StrobeEnabled = true;
 
-	[Header("How often do we strobe")]
-	[Range(0.1f,10)]
-	public float			StrobeDelay = 2;
-	private float			StrobeTimeout = 0;
+	[Header("How long does the strobe last (seconds)")]
+	[Range(0.01f,7.0f)]
+	public float			_StrobeDuration = 0.1f;
+	float					StrobeDuration			{	get { return StrobeEnabled ? _StrobeDuration : 0; } }
+	[Header("How long does video (non-strobe) last (seconds)")]
+	[Range(0.01f,7.0f)]
+	public float			NonStrobeDuration = 0.1f;
+	private float			StrobeTimer = 0;
 
-	[Header("How long does the strobe last")]
-	[Range(0.01f,1.0f)]
-	public float			StrobeDuration = 0.1f;
 
 	[Header("Optionally set a texture to show when strobing (Colour used if no texture)")]
 	public Texture 			StrobeTexture = null;
@@ -105,6 +109,8 @@ public class FrameBuffering : MonoBehaviour {
 		Cache.Frame = NewFrame;
 		Cache.Time = FrameTime;
 		FrameBuffer.Add (Cache);
+
+		LastFrameTime = FrameTime;
 	}
 
 	void PushBuffer_PopMovie()
@@ -119,7 +125,6 @@ public class FrameBuffering : MonoBehaviour {
 		if ( LastCopyTime > LastFrameTime )
 		{
 			OnNewFrame (PopMovieObject.TargetTexture,LastCopyTime);
-			LastFrameTime = LastCopyTime;
 		}
 	}
 
@@ -135,19 +140,27 @@ public class FrameBuffering : MonoBehaviour {
 
 	void PushBuffer_Webcam()
 	{
-		if (Webcam == null)
+		if (Webcam == null && DummyWebcam == null)
 		{
-			Webcam = new WebCamTexture( WebcamName );
-			Webcam.Play();
+			try
+			{
+				Webcam = new WebCamTexture( WebcamName );
+				Webcam.Play();
+				if ( !Webcam.isPlaying )
+					throw new System.Exception("No webcam");
+			}
+			catch {
+				Webcam = null;
+				DummyWebcam = Texture2D.whiteTexture;
+			}
 		}
 
-		if (Webcam.didUpdateThisFrame)
+		if ( DummyWebcam != null || (Webcam!=null && Webcam.didUpdateThisFrame) )
 		{
 			uint LastCopyTime = GetWebcamTime();
 			if ( LastCopyTime > LastFrameTime )
 			{
-				OnNewFrame (Webcam,LastCopyTime);
-				LastFrameTime = LastCopyTime;
+				OnNewFrame ( DummyWebcam ? DummyWebcam : Webcam,LastCopyTime);
 			}
 		}
 
@@ -166,9 +179,13 @@ public class FrameBuffering : MonoBehaviour {
 	{
 		//	copy live frame
 		if (ShowLiveFeed) {
-			if (PopMovieObject)
+			if (PopMovieObject) 
 			{
-				Graphics.Blit(PopMovieObject.TargetTexture, LeftEye);
+				Graphics.Blit (PopMovieObject.TargetTexture, LeftEye);
+			}
+			else if (DummyWebcam) 
+			{
+				Graphics.Blit(DummyWebcam, LeftEye);
 			}
 			else if (Webcam)
 			{
@@ -185,28 +202,19 @@ public class FrameBuffering : MonoBehaviour {
 		if (DelayMs > LastCopyTime)
 			return;
 
-		if ( StrobeEnabled )
-		{
-			//	gr: don't strobe until we've buffered, otherwise the strobe can sit on screen too long.
-			//	check in case we need to strobe
-			StrobeTimeout -= Time.unscaledDeltaTime;
-			//	when counter is negative, we use it as the "how long we're strobing for" counter
-			if (StrobeTimeout < -StrobeDuration) {
-				//	reset 
-				//	gr: +Timeout so StrobeDelay is the time until next starts, not the GAP between strobes
-				StrobeTimeout = StrobeDelay + StrobeTimeout;
-			} else if (StrobeTimeout <= 0) {
-				//	strobe
-				//	gr: could save GPU time here and skip blit if we know the texture is black from before
-				Graphics.Blit (StrobeTexture, LeftEye);
-				Graphics.Blit (StrobeTexture, RightEye);
-				return;
-			}
-			else
-			{
-				//	counting down to strobe
-			}
+
+		StrobeTimer += Time.unscaledDeltaTime;
+		float TotalDuration = StrobeDuration + NonStrobeDuration;
+		StrobeTimer = StrobeTimer % TotalDuration;
+
+		if (StrobeTimer < StrobeDuration) {
+			//	strobing
+			Graphics.Blit (StrobeTexture, LeftEye);
+			Graphics.Blit (StrobeTexture, RightEye);
+			return;
 		}
+
+		//	else we're showing video
 
 
 		var DelayedTime = LastCopyTime - DelayMs;
