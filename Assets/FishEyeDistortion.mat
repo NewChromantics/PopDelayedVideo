@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: FishEyeDistortion
-  m_Shader: {fileID: 4800000, guid: defe951521d7dec4a88f48a151768fb5, type: 3}
+  m_Shader: {fileID: 4800000, guid: da9e846074f8350419d860cce8d6ff07, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
   m_CustomRenderQueue: -1
@@ -29,6 +29,18 @@ Material:
         name: BarrelPower
       second: 0.42
     - first:
+        name: ShrinkCenter_U
+      second: 0.5
+    - first:
+        name: ShrinkCenter_V
+      second: 0.5
+    - first:
+        name: ShrinkScale
+      second: 1
+    - first:
         name: ZoomUv
       second: 1
-    m_Colors: []
+    m_Colors:
+    - first:
+        name: ShrinkClipColour
+      second: {r: 0, g: 0, b: 0, a: 1}
