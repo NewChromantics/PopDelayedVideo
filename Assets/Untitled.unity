@@ -383,9 +383,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LeftEye: {fileID: 8400000, guid: e7e3810e7c87b4d49b1503cc9881bac8, type: 2}
   RightEye: {fileID: 8400000, guid: 9599b84680a214fd69edd93af32302b7, type: 2}
-  PopMovieObject: {fileID: 0}
+  LiveFrame: {fileID: 8400000, guid: 546de8f0ee0b94ec98b6ffa82d4ece96, type: 2}
   WebcamName: MMP SDK
   Webcam: {fileID: 0}
+  WebcamWidth: 0
+  WebcamHeight: 0
   DummyWebcam: {fileID: 0}
   DelayBeforeShowLiveFeed: 4
   ShowLiveFeed: 1
@@ -478,6 +480,73 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 185236552}
+--- !u!1 &210865052
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 210865053}
+  - component: {fileID: 210865055}
+  - component: {fileID: 210865054}
+  m_Layer: 5
+  m_Name: Left eye undistorted
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &210865053
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 210865052}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 2122935230}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &210865054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 210865052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -98529514, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Texture: {fileID: 8400000, guid: 546de8f0ee0b94ec98b6ffa82d4ece96, type: 2}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+--- !u!222 &210865055
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 210865052}
 --- !u!1 &265649030
 GameObject:
   m_ObjectHideFlags: 0
@@ -860,72 +929,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3fe7a4db6b44b2297d35af5a61c29f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetTexture: {fileID: 8400000, guid: 546de8f0ee0b94ec98b6ffa82d4ece96, type: 2}
-  Filename: device:MMP SDK
-  MovieTime: 0
-  MovieTimeScalar: 1
-  Parameters:
-    SkipPushFrames: 0
-    SkipPopFrames: 1
-    AllowGpuColourConversion: 1
-    AllowCpuColourConversion: 0
-    AllowSlowCopy: 1
-    AllowFastCopy: 1
-    PixelClientStorage: 0
-    StretchImage: 1
-    DebugFrameSkipping: 0
-    PeekBeforeDefferedCopy: 1
-    DebugNoNewPixelBuffer: 0
-    DebugRenderThreadCallback: 0
-    ResetInternalTimestamp: 1
-    DebugBlit: 0
-    ApplyVideoTransform: 1
-    GenerateMipMaps: 0
-    PopNearestFrame: 0
-    DebugTimers: 0
-    DecoderUseHardwareBuffer: 1
-    BlitFatalErrors: 1
-    ForceNonPlanarOutput: 0
-    ForceYuvRangeFull: 0
-    ForceYuvRangeNtsc: 0
-    ForceYuvRangeSmptec: 0
-    MergeYuv: 1
-    ClearBeforeBlit: 1
-    EnableAudioStreams: 1
-    EnableVideoStreams: 1
-    EnableDepthStreams: 1
-    EnableSkeletonStreams: 1
-    EnableAlpha: 1
-    CopyFrameAtUpdateTime: 0
-    OnlyExtractKeyframes: 0
-    ApplyHeightPadding: 1
-    ApplyWidthPadding: 1
-    WindowIncludeBorders: 1
-    VerboseDebug: 0
-    Windows7Emulation: 0
-    SplitAudioChannelsIntoStreams: 0
-    SplitVideoPlanesIntoStreams: 0
-    EnableDecoderThreading: 1
-    UseLiveTimestampsForStreaming: 1
-    CopyBuffersInExtraction: 0
-    ExtractorPreDecodeSkip: 0
-    AndroidSingleBufferMode: 0
-    DrawTimestamps: 0
-  PlayOnAwake: 1
-  Playing: 0
-  OnFinished:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  OnStreamsChanged:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  AudioStream: 0
-  VideoStream: 0
-  EnableDebugLog: 0
 --- !u!4 &761189784
 Transform:
   m_ObjectHideFlags: 0
@@ -1023,7 +1026,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!23 &1268777289
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1223,3 +1226,119 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1444846226}
+--- !u!1 &2122935225
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2122935230}
+  - component: {fileID: 2122935229}
+  - component: {fileID: 2122935228}
+  - component: {fileID: 2122935227}
+  - component: {fileID: 2122935226}
+  m_Layer: 5
+  m_Name: Debug Canvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2122935226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2122935225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -405508275, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+--- !u!114 &2122935227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2122935225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1301386320, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &2122935228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2122935225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1980459831, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 0
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+--- !u!223 &2122935229
+Canvas:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2122935225}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!224 &2122935230
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2122935225}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 210865053}
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -46.6, y: -177.2}
+  m_SizeDelta: {x: 64.8, y: 47.8}
+  m_Pivot: {x: 0.5, y: 0.5}

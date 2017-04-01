@@ -14,6 +14,7 @@ public class FrameBuffering : MonoBehaviour {
 
 	public RenderTexture	LeftEye;
 	public RenderTexture	RightEye;
+	public RenderTexture	LiveFrame;
 
 	[Header("video input. If PopMovieObject is null, a webcam texture is created with the name below")]
 #if ENABLE_POPMOVIE
@@ -21,6 +22,8 @@ public class FrameBuffering : MonoBehaviour {
 #endif
 	public string			WebcamName;
 	public WebCamTexture	Webcam;
+	public int				WebcamWidth = 1280;
+	public int				WebcamHeight = 720;
 
 	[Header("Set this texture and we'll use it instead of a webcam (for when you have no webcam)")]
 	public Texture			DummyWebcam;
@@ -107,10 +110,15 @@ public class FrameBuffering : MonoBehaviour {
 			FrameBuffer.RemoveRange( MaxBufferSize-1, (FrameBuffer.Count - MaxBufferSize)+1 );
 		}
 
+		WebcamWidth = Frame.width;
+		WebcamHeight = Frame.height;
+
 		var Cache = new FrameCache ();
 		var NewFrame = new RenderTexture (Frame.width, Frame.height, 0, RightEye.format );
 		NewFrame.name = "" + FrameTime;
 		Graphics.Blit (Frame, NewFrame);
+		if ( LiveFrame != null )
+			Graphics.Blit( Frame, LiveFrame );
 		Cache.Frame = NewFrame;
 		Cache.Time = FrameTime;
 		FrameBuffer.Add (Cache);
@@ -151,7 +159,10 @@ public class FrameBuffering : MonoBehaviour {
 		{
 			try
 			{
-				Webcam = new WebCamTexture( WebcamName );
+				if ( WebcamWidth>0 && WebcamHeight>0 )
+					Webcam = new WebCamTexture( WebcamName, WebcamWidth, WebcamHeight );
+				else
+					Webcam = new WebCamTexture( WebcamName );
 				Webcam.Play();
 				if ( !Webcam.isPlaying )
 					throw new System.Exception("No webcam");
