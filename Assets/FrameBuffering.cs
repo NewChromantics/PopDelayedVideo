@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿//#define ENABLE_POPMOVIE
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,7 +16,9 @@ public class FrameBuffering : MonoBehaviour {
 	public RenderTexture	RightEye;
 
 	[Header("video input. If PopMovieObject is null, a webcam texture is created with the name below")]
+#if ENABLE_POPMOVIE
 	public PopMovieSimple	PopMovieObject;
+#endif
 	public string			WebcamName;
 	public WebCamTexture	Webcam;
 
@@ -83,10 +86,12 @@ public class FrameBuffering : MonoBehaviour {
 			Graphics.Blit (ClearTexture, RightEye);
 		}
 
+#if ENABLE_POPMOVIE
 		if (PopMovieObject == null)
 		{
 			PopMovieObject = GetComponent<PopMovieSimple> ();
 		}
+#endif
 	}
 
 	void OnNewFrame(Texture Frame,uint FrameTime)
@@ -113,6 +118,7 @@ public class FrameBuffering : MonoBehaviour {
 		LastFrameTime = FrameTime;
 	}
 
+#if ENABLE_POPMOVIE
 	void PushBuffer_PopMovie()
 	{
 		var PopMovie = GetMovie();
@@ -127,6 +133,7 @@ public class FrameBuffering : MonoBehaviour {
 			OnNewFrame (PopMovieObject.TargetTexture,LastCopyTime);
 		}
 	}
+#endif
 
 	uint GetWebcamTime()
 	{
@@ -166,7 +173,7 @@ public class FrameBuffering : MonoBehaviour {
 
 	}
 
-	
+#if ENABLE_POPMOVIE
 	PopMovie GetMovie()
 	{
 		if (!PopMovieObject)
@@ -174,16 +181,21 @@ public class FrameBuffering : MonoBehaviour {
 		var Movie = PopMovieObject.Movie;
 		return Movie;
 	}
+#endif
 
 	void PopBuffer()
 	{
 		//	copy live frame
-		if (ShowLiveFeed) {
+		if (ShowLiveFeed)
+		{
+#if ENABLE_POPMOVIE
 			if (PopMovieObject) 
 			{
 				Graphics.Blit (PopMovieObject.TargetTexture, LeftEye);
 			}
-			else if (DummyWebcam) 
+			else
+#endif 
+			if (DummyWebcam) 
 			{
 				Graphics.Blit(DummyWebcam, LeftEye);
 			}
@@ -241,7 +253,8 @@ public class FrameBuffering : MonoBehaviour {
 	{
 		if (ShowLiveFeed)
 			return;
-		
+
+#if ENABLE_POPMOVIE
 		var PopMovie = GetMovie();
 		if (PopMovie == null)
 			return;
@@ -249,16 +262,19 @@ public class FrameBuffering : MonoBehaviour {
 		float LastCopyTime = PopMovie.GetLastFrameCopied ();
 		if (LastCopyTime > DelayBeforeShowLiveFeed)
 			ShowLiveFeed = true;
+#endif
 	}
 
 	void Update () 
 	{
 		//	get new frames
+#if ENABLE_POPMOVIE
 		if ( PopMovieObject != null )
 		{
 			PushBuffer_PopMovie();
 		}
 		else
+#endif
 		{
 			PushBuffer_Webcam();
 		}
